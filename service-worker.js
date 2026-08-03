@@ -3,7 +3,7 @@ const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
   './launchericon-512x512.png',
-  './icons/icon-512.png'
+  './pngkey.com-checkmark-png-4581.png'
 ];
 
 self.addEventListener('install', (e) => {
