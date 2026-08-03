@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CSE A1 · Attendance</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a0f;
+  --surface:#13131a;
+  --surface2:#1c1c28;
+  --surface3:#252535;
+  --border:#2a2a3d;
+  --accent:#7c6ff7;
+  --accent2:#5b54d6;
+  --green:#22c55e;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --slate:#64748b;
+  --text:#f0f0ff;
+  --muted:#8888aa;
+  --radius:14px;
+  --radius-sm:9px;
+}
+html{-webkit-tap-highlight-color:transparent;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,10,15,.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:10px 16px 8px;
+}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.app-title{font-size:.95rem;font-weight:700;}
+.app-title span{color:var(--accent);}
+.ist-badge{
+  font-size:.68rem;font-weight:600;
+  background:rgba(124,111,247,.15);color:var(--accent);
+  padding:4px 10px;border-radius:20px;
+  border:1px solid rgba(124,111,247,.3);
+  font-variant-numeric:tabular-nums;
+}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;}
+nav::-webkit-scrollbar{display:none;}
+.nav-btn{
+  border:none;background:transparent;color:var(--muted);
+  padding:7px 12px;border-radius:8px;cursor:pointer;
+  font-size:.75rem;font-weight:500;white-space:nowrap;
+  transition:all .18s;
+}
+.nav-btn:hover{background:var(--surface3);color:var(--text);}
+.nav-btn.active{background:var(--accent2);color:#fff;}
+
+/* MAIN */
+main{padding:14px;max-width:900px;margin:0 auto;padding-bottom:60px;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fadeUp .22s ease both;}
+
+/* CARD */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;margin-bottom:10px;
+}
+
+/* CLASS BLOCK */
+.class-block{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:10px;overflow:hidden;
+  animation:fadeUp .22s ease both;transition:border-color .2s;
+}
+.class-block.live-block{border-color:var(--accent);}
+.class-header{padding:12px 14px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.subj-name{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.class-meta{font-size:.72rem;color:var(--muted);margin-top:4px;line-height:1.7;}
+.pct-chip{font-size:.78rem;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid;white-space:nowrap;}
+.pct-chip.ok{background:rgba(34,197,94,.12);color:var(--green);border-color:rgba(34,197,94,.3);}
+.pct-chip.bad{background:rgba(239,68,68,.12);color:var(--red);border-color:rgba(239,68,68,.3);}
+.pct-chip.na{background:var(--surface3);color:var(--muted);border-color:var(--border);}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;font-size:.62rem;font-weight:600;padding:2px 7px;border-radius:20px;}
+.tag-t{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);}
+.tag-p{background:rgba(124,111,247,.15);color:#a5b4fc;border:1px solid rgba(124,111,247,.3);}
+.tag-c{background:rgba(165,180,252,.08);color:#c4b5fd;border:1px solid rgba(165,180,252,.2);}
+.live-tag{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:.62rem;font-weight:600;
+  background:rgba(239,68,68,.15);color:#fca5a5;
+  border:1px solid rgba(239,68,68,.3);
+  padding:2px 7px;border-radius:20px;
+  animation:pulse 1.4s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+/* BULK BAR */
+.bulk-bar{
+  display:flex;gap:5px;flex-wrap:wrap;
+  padding:8px 12px;background:var(--surface2);border-top:1px solid var(--border);
+}
+.bulk-btn{
+  border:none;background:var(--surface3);color:var(--muted);
+  padding:6px 11px;border-radius:7px;cursor:pointer;font-size:.7rem;font-weight:500;
+  transition:all .15s;
+}
+.bulk-btn:hover{color:var(--text);}
+.bulk-btn.bp:hover{background:rgba(34,197,94,.2);color:var(--green);}
+.bulk-btn.ba:hover{background:rgba(239,68,68,.2);color:var(--red);}
+.bulk-btn.bc:hover{background:rgba(100,116,139,.2);color:var(--slate);}
+
+/* HOUR ROWS */
+.hour-rows{border-top:1px solid var(--border);}
+.hour-row{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid var(--border);transition:background .15s;
+}
+.hour-row:last-child{border-bottom:none;}
+.hour-row.live-row{background:rgba(124,111,247,.07);}
+.hour-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;transition:background .2s;}
+.hour-info{flex:1;}
+.hour-label{font-size:.8rem;font-weight:600;}
+.hour-time{font-size:.7rem;color:var(--muted);}
+.hour-warn{font-size:.66rem;color:var(--amber);margin-top:2px;}
+.hour-warn.live-warn{color:#a5b4fc;}
+.unit-btns{display:flex;gap:5px;}
+.unit-btn{
+  border:none;padding:7px 13px;border-radius:7px;cursor:pointer;
+  font-size:.72rem;font-weight:600;color:#fff;
+  opacity:.3;transition:opacity .15s,transform .1s;
+}
+.unit-btn:active{transform:scale(.92);}
+.unit-btn.sel{opacity:1;}
+.unit-btn.up{background:var(--green);}
+.unit-btn.ua{background:var(--red);}
+.unit-btn.uc{background:var(--slate);}
+
+/* DATEBAR */
+.datebar{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap;}
+.db-btn{
+  background:var(--surface2);color:var(--text);
+  border:1px solid var(--border);
+  padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:.78rem;
+  transition:all .15s;
+}
+.db-btn:hover{background:var(--surface3);}
+input[type=date]{
+  background:var(--surface2);color:var(--text);
+  border:1px solid var(--border);padding:8px;
+  border-radius:var(--radius-sm);font-size:.78rem;font-family:inherit;
+}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-bottom:10px;}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center;}
+.stat-box .num{font-size:1.4rem;font-weight:700;line-height:1;}
+.stat-box .lbl{font-size:.63rem;color:var(--muted);margin-top:4px;}
+.big-pct{font-size:2.4rem;font-weight:800;text-align:center;line-height:1;margin:6px 0;}
+.section-title{font-size:.75rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;}
+.progress{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.progress>div{height:100%;border-radius:3px;transition:width .4s ease;}
+.pill{padding:3px 9px;border-radius:20px;font-size:.68rem;font-weight:600;display:inline-block;}
+.pill.ok{background:rgba(34,197,94,.15);color:var(--green);}
+.pill.warn{background:rgba(239,68,68,.15);color:var(--red);}
+.subj-bar{margin-bottom:12px;}
+.subj-bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:.75rem;}
+table{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:8px;}
+th,td{border:1px solid var(--border);padding:7px 6px;text-align:center;}
+th{background:var(--surface2);color:var(--muted);font-weight:600;font-size:.67rem;letter-spacing:.3px;}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CALENDAR — completely redesigned
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.cal-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-nav-title{font-size:1.1rem;font-weight:700;}
+.cal-nav-btn{
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text);padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;
+  font-size:.82rem;transition:all .15s;
+}
+.cal-nav-btn:hover{background:var(--surface3);}
+
+/* Day header row */
+.cal-dow-row{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:4px;margin-bottom:4px;
+}
+.cal-dow{
+  text-align:center;font-size:.72rem;font-weight:700;
+  color:var(--muted);padding:6px 0;
+  letter-spacing:.4px;
+}
+.cal-dow.weekend{color:rgba(124,111,247,.7);}
+
+/* Day cells grid */
+.cal-days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+
+/* Individual day cell */
+.cal-cell{
+  border-radius:10px;
+  min-height:80px;
+  border:1px solid var(--border);
+  padding:8px 6px 6px;
+  cursor:pointer;
+  transition:transform .12s,border-color .2s,background .2s;
+  display:flex;flex-direction:column;
+  background:var(--surface2);
+  position:relative;
+}
+.cal-cell:hover{transform:scale(1.04);z-index:2;border-color:var(--muted);}
+.cal-cell.empty{background:transparent;border:none;cursor:default;}
+.cal-cell.empty:hover{transform:none;}
+.cal-cell.before-start{background:var(--bg);opacity:.4;cursor:default;}
+.cal-cell.before-start:hover{transform:none;}
+.cal-cell.future-day{background:var(--surface);opacity:.6;}
+.cal-cell.no-class{background:var(--bg);border-style:dashed;opacity:.5;}
+.cal-cell.is-today{border-color:var(--accent)!important;border-width:2px;}
+.cal-cell.is-selected{border-color:#fff!important;border-width:2px;}
+.cal-cell.is-selected.is-today{border-color:var(--accent)!important;}
+
+/* Status backgrounds */
+.cal-cell.st-present{background:rgba(34,197,94,.1);}
+.cal-cell.st-absent{background:rgba(239,68,68,.12);}
+.cal-cell.st-partial{background:rgba(245,158,11,.1);}
+.cal-cell.st-cancelled{background:rgba(100,116,139,.07);}
+.cal-cell.st-unmarked{background:rgba(245,158,11,.07);}
+
+/* Day number — BIG */
+.cal-day-num{
+  font-size:1.25rem;
+  font-weight:800;
+  line-height:1;
+  margin-bottom:2px;
+  color:var(--text);
+}
+.cal-cell.future-day .cal-day-num{color:var(--muted);}
+.cal-cell.before-start .cal-day-num{color:var(--border);}
+.cal-cell.is-today .cal-day-num{color:var(--accent);}
+
+/* Day name — short inside cell */
+.cal-day-name{
+  font-size:.6rem;
+  font-weight:600;
+  letter-spacing:.3px;
+  color:var(--muted);
+  margin-bottom:5px;
+  text-transform:uppercase;
+}
+.cal-cell.is-today .cal-day-name{color:var(--accent);opacity:.8;}
+
+/* Dots row */
+.cal-dots-row{
+  display:flex;flex-wrap:wrap;gap:3px;
+  margin-top:auto;padding-top:4px;
+}
+.cdot{
+  width:8px;height:8px;border-radius:50%;
+  flex-shrink:0;transition:transform .1s;
+}
+.cal-cell:hover .cdot{transform:scale(1.2);}
+
+/* Status label */
+.cal-status-lbl{
+  font-size:.55rem;font-weight:700;
+  margin-top:4px;text-align:center;
+  letter-spacing:.2px;line-height:1;
+}
+
+/* Today marker chip */
+.today-chip{
+  position:absolute;top:5px;right:5px;
+  background:var(--accent);color:#fff;
+  font-size:.48rem;font-weight:700;
+  padding:1px 5px;border-radius:4px;
+  letter-spacing:.3px;
+}
+
+/* Month summary */
+.month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.month-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;text-align:center;}
+.month-box .num{font-size:1.4rem;font-weight:700;}
+.month-box .lbl{font-size:.62rem;color:var(--muted);margin-top:3px;}
+
+/* Legend */
+.cal-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.7rem;color:var(--muted);margin-bottom:10px;}
+.cal-legend span{display:flex;align-items:center;gap:4px;}
+.leg-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+
+/* DAY PANEL */
+.day-panel{
+  background:var(--surface);border:2px solid var(--accent);
+  border-radius:var(--radius);padding:14px;margin-top:10px;
+  animation:fadeUp .2s ease both;
+}
+.day-panel-hdr{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.edit-btn{
+  background:var(--accent2);color:#fff;border:none;
+  padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;
+  font-size:.74rem;font-weight:600;transition:all .15s;
+}
+.edit-btn:hover{background:var(--accent);}
+.cls-row-panel{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;
+}
+.cls-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.hour-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.hour-pill{
+  font-size:.65rem;padding:4px 9px;border-radius:7px;
+  border:1px solid;display:inline-flex;align-items:center;gap:4px;font-weight:600;
+}
+
+/* FORMS */
+label{display:block;font-size:.75rem;color:var(--muted);margin:8px 0 3px;}
+input[type=number],input[type=text],input[type=time],select,textarea{
+  background:var(--surface2);color:var(--text);
+  border:1px solid var(--border);padding:8px;
+  border-radius:var(--radius-sm);width:100%;font-family:inherit;font-size:.8rem;
+  transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.act-btn{
+  padding:9px 16px;border-radius:var(--radius-sm);border:none;
+  background:var(--surface3);color:var(--text);cursor:pointer;
+  font-size:.78rem;font-weight:500;transition:all .15s;
+}
+.act-btn:hover{background:var(--accent2);color:#fff;}
+.act-btn.danger{background:rgba(239,68,68,.12);color:var(--red);}
+.act-btn.danger:hover{background:var(--red);color:#fff;}
+.act-btn.primary{background:var(--accent2);color:#fff;}
+.act-btn.primary:hover{background:var(--accent);}
+details summary{cursor:pointer;font-size:.76rem;color:var(--muted);padding:4px 0;}
+details[open] summary{color:var(--accent);}
+.alert-card{border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:.82rem;}
+.alert-card.danger{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+.alert-card.success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:#86efac;}
+.center{text-align:center;}
+.small{font-size:.74rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div class="app-title">📋 CSE <span>A1</span> Attendance</div>
+    <div class="ist-badge" id="istClock">--:-- IST</div>
+  </div>
+  <div class="small" style="margin-bottom:6px;">Faculty of Technology, University of Delhi — 2026-27</div>
+  <nav>
+    <button class="nav-btn" data-tab="dashboard" onclick="switchTab('dashboard')">🏠 Home</button>
+    <button class="nav-btn" data-tab="mark"      onclick="switchTab('mark')">✏️ Mark</button>
+    <button class="nav-btn" data-tab="stats"     onclick="switchTab('stats')">📊 Stats</button>
+    <button class="nav-btn" data-tab="calendar"  onclick="switchTab('calendar')">📅 Calendar</button>
+    <button class="nav-btn" data-tab="timetable" onclick="switchTab('timetable')">🗓 Timetable</button>
+    <button class="nav-btn" data-tab="settings"  onclick="switchTab('settings')">⚙️ Settings</button>
+  </nav>
+</header>
+<main id="content"></main>
+
+<script>
+/* ══════════════════════════════════════
+   IST UTILITIES
+══════════════════════════════════════ */
+const IST_MS=5.5*3600000;
+function nowIST(){return new Date(Date.now()+IST_MS);}
+function todayIST(){const n=nowIST();return new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate()));}
+function fmtDate(d){return d.getUTCFullYear()+'-'+p2(d.getUTCMonth()+1)+'-'+p2(d.getUTCDate());}
+function parseDate(s){const[y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d));}
+function addDays(d,n){return new Date(d.getTime()+n*86400000);}
+function p2(n){return n<10?'0'+n:''+n;}
+function istHHMM(){const n=nowIST();return p2(n.getUTCHours())+':'+p2(n.getUTCMinutes());}
+function istFull(){
+  const n=nowIST();const h=n.getUTCHours(),m=n.getUTCMinutes(),s=n.getUTCSeconds();
+  const ap=h>=12?'PM':'AM';const hh=h%12||12;
+  return `${p2(hh)}:${p2(m)}:${p2(s)} ${ap} IST`;
+}
+function isOngoing(s,e){const t=istHHMM();return t>=s&&t<e;}
+function isPast(e){return istHHMM()>=e;}
+setInterval(()=>{const el=document.getElementById('istClock');if(el)el.textContent=istFull();},1000);
+(()=>{const el=document.getElementById('istClock');if(el)el.textContent=istFull();})();
+
+/* ══════════════════════════════════════
+   TIMETABLE
+══════════════════════════════════════ */
+const START_DATE=parseDate('2026-07-28');
+const TT={
+  1:[
+    {subject:'PSCS-A',type:'Theory',   faculty:'Dr. Ahmad Zaman Khan',room:'R2', start:'09:00',end:'11:00'},
+    {subject:'ADA',   type:'Theory',   faculty:'Dr. Juhi Jain',       room:'R2', start:'11:00',end:'13:00'},
+    {subject:'ADA',   type:'Practical',faculty:'Dr. Juhi Jain',       room:'R3', start:'14:00',end:'16:00',note:'Batch A1'},
+    {subject:'PSCS-A',type:'Practical',faculty:'Dr. Ahmad Zaman Khan',room:'R2', start:'16:00',end:'18:00',note:'CSE-A+B1'}
+  ],
+  2:[
+    {subject:'PSCS-A',type:'Theory',   faculty:'Dr. Ahmad Zaman Khan',room:'R2',start:'09:00',end:'10:00'},
+    {subject:'DBMS',  type:'Theory',   faculty:'Dr. Geetanjali Bhola',room:'R1',start:'11:00',end:'13:00'},
+    {subject:'SFL',   type:'Theory',   faculty:'Dr. Ashutosh Pandey', room:'-', start:'15:00',end:'17:00'}
+  ],
+  3:[
+    {subject:'EVS-2', type:'Theory',   faculty:'Dr. Udita Sharma',    room:'314',start:'09:00',end:'11:00'},
+    {subject:'DSD',   type:'Theory',   faculty:'Dr. Bhawna Rawat',    room:'R2', start:'11:00',end:'13:00'},
+    {subject:'DBMS',  type:'Practical',faculty:'Dr. Geetanjali Bhola',room:'R4', start:'14:00',end:'16:00',note:'Batch A1'}
+  ],
+  4:[
+    {subject:'DBMS',  type:'Theory',   faculty:'Dr. Geetanjali Bhola',room:'R1',start:'11:00',end:'12:00'},
+    {subject:'DSD',   type:'Theory',   faculty:'Dr. Bhawna Rawat',    room:'R1',start:'12:00',end:'13:00'}
+  ],
+  5:[
+    {subject:'DSD',   type:'Practical',faculty:'Dr. Bhawna Rawat',    room:'R4',start:'11:00',end:'13:00',note:'Batch A1'},
+    {subject:'ADA',   type:'Theory',   faculty:'Dr. Juhi Jain',       room:'R2',start:'13:00',end:'14:00'}
+  ],
+  6:[],0:[]
+};
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAYS_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+/* ══════════════════════════════════════
+   UNIT ENGINE
+══════════════════════════════════════ */
+function getUnits(dateStr){
+  const dow=parseDate(dateStr).getUTCDay();
+  const slots=[...(TT[dow]||[]),...(store.extra[dateStr]||[])];
+  const units=[];
+  slots.forEach(cls=>{
+    const[sh,sm]=cls.start.split(':').map(Number);
+    const[eh,em]=cls.end.split(':').map(Number);
+    const startM=sh*60+sm,endM=eh*60+em;
+    let idx=1;
+    for(let m=startM;m<endM;m+=60){
+      const uS=p2(Math.floor(m/60))+':'+p2(m%60);
+      const uE=p2(Math.floor((m+60)/60))+':'+p2((m+60)%60);
+      const uid=dateStr+'|'+cls.subject+'|'+cls.type+'|'+uS;
+      units.push({uid,date:dateStr,subject:cls.subject,type:cls.type,faculty:cls.faculty,room:cls.room,note:cls.note||'',isExtra:!!cls.isExtra,slotStart:cls.start,slotEnd:cls.end,uStart:uS,uEnd:uE,hourIndex:idx++,totalHours:(endM-startM)/60});
+    }
+  });
+  return units.sort((a,b)=>a.uStart.localeCompare(b.uStart));
+}
+function groupUnits(units){
+  const map={};
+  units.forEach(u=>{
+    const k=u.subject+'|'+u.type+'|'+u.slotStart;
+    if(!map[k]) map[k]={...u,units:[]};
+    map[k].units.push(u);
+  });
+  return Object.values(map).sort((a,b)=>a.slotStart.localeCompare(b.slotStart));
+}
+
+/* ══════════════════════════════════════
+   REGISTRY — safe onclick data passing
+══════════════════════════════════════ */
+const REG={};let _ri=0;
+function reg(v){const k='r'+(++_ri);REG[k]=v;return k;}
+
+/* ══════════════════════════════════════
+   STORAGE
+══════════════════════════════════════ */
+const SK='cseA1v6';
+let store=JSON.parse(localStorage.getItem(SK))||{};
+function ensureShape(){
+  if(!store.records)  store.records={};
+  if(!store.notes)    store.notes={};
+  if(!store.extra)    store.extra={};
+  if(!store.settings) store.settings={goal:75,semEnd:'2026-12-05',reminderTime:'20:00',reminderOn:false,lastNotified:''};
+}
+ensureShape();
+function save(){localStorage.setItem(SK,JSON.stringify(store));}
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let currentTab='dashboard';
+let _today=todayIST(),todayStr=fmtDate(_today);
+let currentDate=_today<START_DATE?fmtDate(START_DATE):todayStr;
+let calYear=_today.getUTCFullYear(),calMonth=_today.getUTCMonth();
+let selCalDate=currentDate;
+
+setInterval(()=>{
+  const nd=todayIST(),ns=fmtDate(nd);
+  if(ns!==todayStr){_today=nd;todayStr=ns;render();}
+},30000);
+
+function switchTab(t){currentTab=t;render();}
+function render(){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab));
+  const fns={dashboard:renderDashboard,mark:renderMark,stats:renderStats,calendar:renderCalendar,timetable:renderTimetable,settings:renderSettings};
+  if(fns[currentTab]) fns[currentTab]();
+}
+
+/* ══════════════════════════════════════
+   ACTIONS
+══════════════════════════════════════ */
+function setUnit(uid,status){
+  if(store.records[uid]===status) delete store.records[uid];
+  else store.records[uid]=status;
+  save();render();
+}
+function markUnits(key,status){const uids=REG[key];if(!uids)return;uids.forEach(uid=>store.records[uid]=status);save();render();}
+function clearUnits(key){const uids=REG[key];if(!uids)return;uids.forEach(uid=>delete store.records[uid]);save();render();}
+function markDay(dateStr,status){getUnits(dateStr).forEach(u=>store.records[u.uid]=status);save();render();}
+function clearDay(dateStr){getUnits(dateStr).forEach(u=>delete store.records[u.uid]);save();render();}
+
+/* ══════════════════════════════════════
+   STATS HELPERS
+══════════════════════════════════════ */
+function computeStats(){
+  const comp={},subj={};
+  for(const uid in store.records){
+    if(!uid.includes('|'))continue;
+    const st=store.records[uid];
+    if(st==='cancelled')continue;
+    const parts=uid.split('|');
+    const subject=parts[1],type=parts[2];
+    const ck=subject+'|'+type;
+    comp[ck]=comp[ck]||{subject,type,present:0,absent:0};
+    subj[subject]=subj[subject]||{present:0,absent:0};
+    if(st==='present'){comp[ck].present++;subj[subject].present++;}
+    else if(st==='absent'){comp[ck].absent++;subj[subject].absent++;}
+  }
+  return{comp,subj};
+}
+function pct(p,a){const t=p+a;return t===0?null:p/t*100;}
+function pctStr(p,a){const v=pct(p,a);return v===null?'--':v.toFixed(1)+'%';}
+function pctColor(v,goal){return v===null?'var(--muted)':v>=goal?'var(--green)':'var(--red)';}
+function chipCls(v,goal){return v===null?'na':v>=goal?'ok':'bad';}
+function advice(p,a){
+  const t=p+a;if(t===0)return '<span class="small">No data yet</span>';
+  const goal=store.settings.goal/100;const v=pct(p,a);
+  if(v>=store.settings.goal){
+    const can=Math.max(0,Math.floor(p/goal-t));
+    return `<span class="pill ok">${v.toFixed(1)}%</span> — skip <b>${can}</b> more hr${can!==1?'s':''}`;
+  }
+  const need=Math.ceil((goal*t-p)/(1-goal));
+  return `<span class="pill warn">${v.toFixed(1)}%</span> — attend <b>${need}</b> more hr${need!==1?'s':''}`;
+}
+function computeStreak(){
+  const entries=Object.keys(store.records).filter(uid=>uid.includes('|')).map(uid=>({k:uid,st:store.records[uid]})).filter(e=>e.st!=='cancelled').sort((a,b)=>a.k.localeCompare(b.k));
+  let s=0;for(let i=entries.length-1;i>=0;i--){if(entries[i].st==='present')s++;else break;}return s;
+}
+function remHours(subject,type,fromStr,toStr){
+  let c=0;let d=parseDate(fromStr);const end=parseDate(toStr);
+  while(d<=end){getUnits(fmtDate(d)).forEach(u=>{if(u.subject===subject&&u.type===type)c++;});d=addDays(d,1);}
+  return c;
+}
+
+/* ══════════════════════════════════════
+   CLASS BLOCK RENDERER
+══════════════════════════════════════ */
+function renderClassBlock(group,dateStr){
+  const isToday=dateStr===todayStr;
+  const live=isToday&&isOngoing(group.slotStart,group.slotEnd);
+  const isPrac=group.type==='Practical';
+  const uids=group.units.map(u=>u.uid);
+  const allKey=reg(uids);
+  const goal=store.settings.goal;
+
+  let sp=0,sa=0,su=0;
+  group.units.forEach(u=>{
+    const s=store.records[u.uid];
+    if(s==='present')sp++;else if(s==='absent')sa++;else if(s!=='cancelled')su++;
+  });
+  const spv=pct(sp,sa);
+
+  let html=`<div class="class-block${live?' live-block':''}">
+    <div class="class-header">
+      <div style="flex:1;">
+        <div class="subj-name">
+          ${group.subject}
+          <span class="tag ${isPrac?'tag-p':'tag-t'}">${group.type}</span>
+          ${group.note?`<span class="tag tag-c">${group.note}</span>`:''}
+          ${live?`<span class="live-tag">● LIVE NOW</span>`:''}
+        </div>
+        <div class="class-meta">
+          ${group.slotStart}–${group.slotEnd} IST &nbsp;·&nbsp; ${group.faculty} &nbsp;·&nbsp; Room ${group.room}<br>
+          ${group.units.length} unit${group.units.length>1?'s':''} &nbsp;·&nbsp; ${sp}P / ${sa}A / ${su} unmarked
+        </div>
+      </div>
+      <div class="pct-chip ${chipCls(spv,goal)}">${spv===null?'--':spv.toFixed(0)+'%'}</div>
+    </div>
+    <div class="bulk-bar">
+      <button class="bulk-btn bp" onclick="markUnits('${allKey}','present')">✅ All P</button>
+      <button class="bulk-btn ba" onclick="markUnits('${allKey}','absent')">❌ All A</button>
+      <button class="bulk-btn bc" onclick="markUnits('${allKey}','cancelled')">🚫 Cancel</button>
+      <button class="bulk-btn" onclick="clearUnits('${allKey}')">↩ Clear</button>
+    </div>
+    <div class="hour-rows">`;
+
+  group.units.forEach(u=>{
+    const s=store.records[u.uid];
+    const unitLive=isToday&&isOngoing(u.uStart,u.uEnd);
+    const unitPast=isToday&&isPast(u.uEnd);
+    const dotBg=s==='present'?'var(--green)':s==='absent'?'var(--red)':s==='cancelled'?'var(--slate)':unitLive?'var(--accent)':unitPast?'var(--amber)':'var(--surface3)';
+
+    html+=`<div class="hour-row${unitLive?' live-row':''}">
+      <div class="hour-dot" style="background:${dotBg};"></div>
+      <div class="hour-info">
+        <div class="hour-label">Hour ${u.hourIndex} <span class="hour-time">${u.uStart}–${u.uEnd}</span></div>
+        ${unitLive?`<div class="hour-warn live-warn">🔴 Ongoing now</div>`:''}
+        ${unitPast&&!s?`<div class="hour-warn">⚠ Unmarked</div>`:''}
+      </div>
+      <div class="unit-btns">
+        <button class="unit-btn up${s==='present'?' sel':''}" onclick="setUnit('${u.uid}','present')">✓ P</button>
+        <button class="unit-btn ua${s==='absent'?' sel':''}" onclick="setUnit('${u.uid}','absent')">✗ A</button>
+        <button class="unit-btn uc${s==='cancelled'?' sel':''}" onclick="setUnit('${u.uid}','cancelled')">– C</button>
+      </div>
+    </div>`;
+  });
+
+  html+=`</div></div>`;
+  return html;
+}
+
+/* ══════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════ */
+function renderDashboard(){
+  const goal=store.settings.goal;
+  const{subj}=computeStats();
+  const warns=Object.keys(subj).filter(s=>{const v=pct(subj[s].present,subj[s].absent);return v!==null&&v<goal;});
+  let tp=0,ta=0;Object.values(subj).forEach(s=>{tp+=s.present;ta+=s.absent;});
+  const ov=pct(tp,ta);const streak=computeStreak();
+  const tdStr=_today<START_DATE?fmtDate(START_DATE):todayStr;
+  const groups=groupUnits(getUnits(tdStr));
+
+  let html=`<div class="card fade-up" style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;">
+    <div><div style="font-weight:700;font-size:1rem;">${DAYS[_today.getUTCDay()]}</div><div class="small">${todayStr}</div></div>
+    <div style="font-size:.74rem;color:var(--accent);font-variant-numeric:tabular-nums;" id="dashClock">${istFull()}</div>
+  </div>`;
+  setInterval(()=>{const el=document.getElementById('dashClock');if(el)el.textContent=istFull();},1000);
+
+  if(warns.length>0){
+    html+=`<div class="alert-card danger fade-up">⚠️ <b>${warns.length} subject${warns.length>1?'s':''} below ${goal}%:</b> ${warns.join(', ')}</div>`;
+  } else if(Object.keys(subj).length>0){
+    html+=`<div class="alert-card success fade-up">✅ All subjects above ${goal}% — you're safe!</div>`;
+  }
+
+  html+=`<div class="card fade-up">
+    <div class="small center" style="margin-bottom:4px;letter-spacing:.5px;">OVERALL ATTENDANCE</div>
+    <div class="big-pct" style="color:${pctColor(ov,goal)}">${ov===null?'--':ov.toFixed(1)+'%'}</div>
+    <div class="progress" style="margin:8px 0 4px;"><div style="width:${ov||0}%;background:${pctColor(ov,goal)};"></div></div>
+    <div class="small center">${tp} hrs attended · ${ta} hrs missed</div>
+  </div>`;
+
+  html+=`<div class="stat-grid fade-up" style="grid-template-columns:repeat(3,1fr);">
+    <div class="stat-box"><div class="num">🔥${streak}</div><div class="lbl">Hr Streak</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--green);">${tp}</div><div class="lbl">Hrs Present</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--red);">${ta}</div><div class="lbl">Hrs Absent</div></div>
+  </div>`;
+
+  html+=`<div class="section-title">Today's Classes</div>`;
+  if(parseDate(tdStr)<START_DATE){
+    html+=`<div class="card small">Classes start 28 July 2026 IST.</div>`;
+  } else if(groups.length===0){
+    html+=`<div class="card small center">🎉 No classes today!</div>`;
+  } else {
+    groups.forEach(g=>{html+=renderClassBlock(g,tdStr);});
+  }
+  html+=`<div class="actions"><button class="act-btn primary" onclick="currentDate='${tdStr}';switchTab('mark')">Open Full Day View →</button></div>`;
+  document.getElementById('content').innerHTML=html;
+}
+
+/* ══════════════════════════════════════
+   MARK TAB
+══════════════════════════════════════ */
+function renderMark(){
+  const d=parseDate(currentDate);
+  const isToday=currentDate===todayStr;
+  const groups=groupUnits(getUnits(currentDate));
+  const allUnits=getUnits(currentDate);
+
+  let html=`<div class="card datebar fade-up" style="padding:10px;">
+    <button class="db-btn" onclick="currentDate=fmtDate(addDays(parseDate(currentDate),-1));render()">◀</button>
+    <input type="date" value="${currentDate}" min="${fmtDate(START_DATE)}" onchange="currentDate=this.value;render()">
+    <button class="db-btn" onclick="currentDate=fmtDate(addDays(parseDate(currentDate),1));render()">▶</button>
+    <button class="db-btn" onclick="currentDate=todayStr;render()">Today</button>
+  </div>
+  <div class="card fade-up" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
+    <div>
+      <div style="font-weight:700;">${DAYS[d.getUTCDay()]}, ${currentDate}</div>
+      <div class="small">${allUnits.length} attendance unit${allUnits.length!==1?'s':''}</div>
+    </div>
+    ${isToday?`<div class="small" style="color:var(--accent);" id="markClock">${istFull()}</div>`:''}
+  </div>`;
+  if(isToday) setInterval(()=>{const el=document.getElementById('markClock');if(el)el.textContent=istFull();},1000);
+
+  if(d<START_DATE){
+    html+=`<div class="card small">📌 Classes start 28 July 2026 IST.</div>`;
+  } else {
+    if(allUnits.length>0){
+      html+=`<div class="card fade-up" style="padding:10px;">
+        <div class="actions" style="margin-top:0;">
+          <button class="act-btn" onclick="markDay('${currentDate}','present')">✅ All Present</button>
+          <button class="act-btn" onclick="markDay('${currentDate}','absent')">❌ All Absent</button>
+          <button class="act-btn" onclick="markDay('${currentDate}','cancelled')">🚫 Cancel Day</button>
+          <button class="act-btn" onclick="clearDay('${currentDate}')">↩ Clear All</button>
+        </div>
+      </div>`;
+    }
+    if(groups.length===0){
+      html+=`<div class="card small center">🎉 No classes scheduled — weekly off.</div>`;
+    } else {
+      groups.forEach(g=>{html+=renderClassBlock(g,currentDate);});
+    }
+    html+=`<div class="card fade-up">
+      <details>
+        <summary><b>➕ Add Extra / Makeup Class</b></summary>
+        <label>Subject</label><input id="exS" placeholder="e.g. ADA">
+        <label>Type</label><select id="exT"><option>Theory</option><option>Practical</option><option>Other</option></select>
+        <label>Faculty</label><input id="exF" placeholder="e.g. Dr. Juhi Jain">
+        <label>Room</label><input id="exR" placeholder="e.g. R2">
+        <label>Start (IST)</label><input id="exSt" type="time" value="09:00">
+        <label>End (IST)</label><input id="exEn" type="time" value="10:00">
+        <div class="actions"><button class="act-btn primary" onclick="addExtra()">Add Class</button></div>
+      </details>
+    </div>`;
+  }
+  document.getElementById('content').innerHTML=html;
+}
+function addExtra(){
+  const s=document.getElementById('exS').value.trim();if(!s)return alert('Enter subject name');
+  const obj={subject:s,type:document.getElementById('exT').value,faculty:document.getElementById('exF').value.trim()||'-',room:document.getElementById('exR').value.trim()||'-',start:document.getElementById('exSt').value,end:document.getElementById('exEn').value,note:'Extra/Makeup',isExtra:true};
+  if(!store.extra[currentDate])store.extra[currentDate]=[];
+  store.extra[currentDate].push(obj);save();render();
+}
+
+/* ══════════════════════════════════════
+   STATS TAB
+══════════════════════════════════════ */
+function renderStats(){
+  const goal=store.settings.goal;
+  const{comp,subj}=computeStats();
+  let tp=0,ta=0;Object.values(subj).forEach(s=>{tp+=s.present;ta+=s.absent;});
+  const ov=pct(tp,ta);
+
+  let html=`<div class="card fade-up">
+    <div class="small center" style="margin-bottom:4px;letter-spacing:.5px;">OVERALL ATTENDANCE</div>
+    <div class="big-pct" style="color:${pctColor(ov,goal)}">${ov===null?'--':ov.toFixed(1)+'%'}</div>
+    <div class="progress" style="margin:8px 0 4px;"><div style="width:${ov||0}%;background:${pctColor(ov,goal)};"></div></div>
+    <div class="small center">${advice(tp,ta)}</div>
+  </div>`;
+
+  html+=`<div class="section-title">Subject Breakdown</div>`;
+  const subjects=[...new Set(Object.values(comp).map(c=>c.subject))].sort();
+  subjects.forEach(s=>{
+    const th=comp[s+'|Theory']||{present:0,absent:0};
+    const pr=comp[s+'|Practical']||null;
+    const tv=pct(th.present,th.absent);
+    const pv=pr?pct(pr.present,pr.absent):null;
+    html+=`<div class="card fade-up" style="padding:12px;">
+      <div style="font-weight:700;margin-bottom:10px;">${s}</div>
+      <div class="subj-bar" style="margin-bottom:${pr?'12px':'0'};">
+        <div class="subj-bar-top">
+          <span class="tag tag-t">Theory</span>
+          <span style="color:${pctColor(tv,goal)};font-weight:600;">${th.present}P / ${th.absent}A &nbsp;·&nbsp; ${pctStr(th.present,th.absent)}</span>
+        </div>
+        <div class="progress"><div style="width:${tv||0}%;background:${pctColor(tv,goal)};"></div></div>
+        <div class="small" style="margin-top:4px;">${advice(th.present,th.absent)}</div>
+      </div>
+      ${pr?`<div class="subj-bar">
+        <div class="subj-bar-top">
+          <span class="tag tag-p">Practical</span>
+          <span style="color:${pctColor(pv,goal)};font-weight:600;">${pr.present}P / ${pr.absent}A &nbsp;·&nbsp; ${pctStr(pr.present,pr.absent)}</span>
+        </div>
+        <div class="progress"><div style="width:${pv||0}%;background:${pctColor(pv,goal)};"></div></div>
+        <div class="small" style="margin-top:4px;">${advice(pr.present,pr.absent)}</div>
+      </div>`:''}
+    </div>`;
+  });
+
+  const compKeys=Object.keys(comp).sort();
+  html+=`<div class="section-title">🧮 Planner</div><div class="card fade-up">
+    <label>Subject + Component</label>
+    <select id="planK" onchange="updatePlanner()">
+      ${compKeys.map(k=>{const v=comp[k];return`<option value="${k}">${v.subject} (${v.type})</option>`;}).join('')}
+    </select>
+    <label>Hours you'll attend</label><input type="number" id="planP" min="0" value="0" oninput="updatePlanner()">
+    <label>Hours you'll miss</label><input type="number" id="planA" min="0" value="0" oninput="updatePlanner()">
+    <div id="planRes" class="big-pct" style="margin-top:10px;font-size:2rem;">--</div>
+  </div>`;
+
+  const semEnd=store.settings.semEnd;
+  const tmrStr=fmtDate(addDays(_today,1));
+  html+=`<div class="section-title">📈 Semester Projection (till ${semEnd})</div>
+  <table><tr><th>Subject</th><th>Type</th><th>Now%</th><th>Rem hrs</th><th>Best</th><th>Worst</th></tr>`;
+  compKeys.forEach(k=>{
+    const v=comp[k];const cur=pct(v.present,v.absent);
+    const rem=remHours(v.subject,v.type,tmrStr,semEnd);
+    const best=pct(v.present+rem,v.absent);
+    const worst=pct(v.present,v.absent+rem);
+    html+=`<tr><td>${v.subject}</td><td>${v.type}</td>
+    <td style="color:${pctColor(cur,goal)};font-weight:600;">${cur===null?'-':cur.toFixed(1)+'%'}</td>
+    <td>${rem}</td>
+    <td style="color:var(--green);">${best===null?'-':best.toFixed(1)+'%'}</td>
+    <td style="color:var(--red);">${worst===null?'-':worst.toFixed(1)+'%'}</td></tr>`;
+  });
+  html+=`</table><div class="small" style="margin-top:6px;">Set semester end date in Settings.</div>`;
+  document.getElementById('content').innerHTML=html;
+  if(compKeys.length>0)updatePlanner();
+}
+function updatePlanner(){
+  const{comp}=computeStats();
+  const sel=document.getElementById('planK');if(!sel)return;
+  const k=sel.value;
+  const pa=parseInt(document.getElementById('planP').value)||0;
+  const aa=parseInt(document.getElementById('planA').value)||0;
+  const v=comp[k]||{present:0,absent:0};
+  const pv=pct(v.present+pa,v.absent+aa);
+  const el=document.getElementById('planRes');if(!el)return;
+  el.style.color=pctColor(pv,store.settings.goal);
+  el.textContent=pv===null?'--':pv.toFixed(1)+'%';
+}
+
+/* ══════════════════════════════════════
+   CALENDAR
+══════════════════════════════════════ */
+function changeMonth(d){
+  calMonth+=d;
+  if(calMonth<0){calMonth=11;calYear--;}
+  if(calMonth>11){calMonth=0;calYear++;}
+  render();
+}
+function selectCalDate(ds){selCalDate=ds;render();setTimeout(()=>{const el=document.getElementById('dpanel');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},60);}
+
+function getUnitsWS(dateStr){
+  return getUnits(dateStr).map(u=>({...u,status:store.records[u.uid]||(parseDate(dateStr)<=_today?'unmarked':'future')}));
+}
+function dotBgFor(status){
+  return status==='present'?'var(--green)':status==='absent'?'var(--red)':status==='cancelled'?'var(--slate)':'var(--amber)';
+}
+function monthSummary(y,m){
+  let mp=0,ma=0,mc=0,mu=0;
+  const dim=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  for(let day=1;day<=dim;day++){
+    const ds=fmtDate(new Date(Date.UTC(y,m,day)));
+    const d=parseDate(ds);if(d>_today||d<START_DATE)continue;
+    getUnitsWS(ds).forEach(u=>{
+      if(u.status==='present')mp++;else if(u.status==='absent')ma++;
+      else if(u.status==='cancelled')mc++;else mu++;
+    });
+  }
+  return{mp,ma,mc,mu};
+}
+function cumUpTo(upTo){
+  const r={};
+  for(const uid in store.records){
+    if(!uid.includes('|'))continue;
+    const st=store.records[uid];if(st==='cancelled')continue;
+    const parts=uid.split('|');
+    const dateStr=parts[0],subject=parts[1],type=parts[2];
+    if(dateStr>upTo)continue;
+    const ck=subject+'|'+type;
+    r[ck]=r[ck]||{subject,type,present:0,absent:0};
+    if(st==='present')r[ck].present++;else if(st==='absent')r[ck].absent++;
+  }
+  return r;
+}
+
+function renderCalendar(){
+  const firstDay=new Date(Date.UTC(calYear,calMonth,1));
+  const sw=firstDay.getUTCDay();
+  const dim=new Date(Date.UTC(calYear,calMonth+1,0)).getUTCDate();
+  const ms=monthSummary(calYear,calMonth);
+  const mv=pct(ms.mp,ms.ma);
+  const goal=store.settings.goal;
+
+  let html=`<div class="cal-wrap fade-up">`;
+
+  // Navigation
+  html+=`<div class="cal-nav">
+    <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ Prev</button>
+    <div class="cal-nav-title">${MONTHS[calMonth]} ${calYear}</div>
+    <button class="cal-nav-btn" onclick="changeMonth(1)">Next ▶</button>
+  </div>`;
+
+  // Month summary
+  html+=`<div class="month-grid">
+    <div class="month-box"><div class="num" style="color:var(--green);">${ms.mp}</div><div class="lbl">Hrs Present</div></div>
+    <div class="month-box"><div class="num" style="color:var(--red);">${ms.ma}</div><div class="lbl">Hrs Absent</div></div>
+    <div class="month-box"><div class="num" style="color:var(--slate);">${ms.mc}</div><div class="lbl">Cancelled</div></div>
+    <div class="month-box"><div class="num" style="color:var(--amber);">${ms.mu}</div><div class="lbl">Unmarked</div></div>
+  </div>`;
+
+  // Month progress bar
+  if(mv!==null){
+    html+=`<div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:.76rem;margin-bottom:5px;">
+        <span style="color:var(--muted);">Month Attendance</span>
+        <span style="color:${pctColor(mv,goal)};font-weight:700;">${mv.toFixed(1)}%</span>
+      </div>
+      <div class="progress"><div style="width:${mv}%;background:${pctColor(mv,goal)};"></div></div>
+    </div>`;
+  }
+
+  // Legend
+  html+=`<div class="cal-legend">
+    <span><span class="leg-dot" style="background:var(--green);"></span>Present hr</span>
+    <span><span class="leg-dot" style="background:var(--red);"></span>Absent hr</span>
+    <span><span class="leg-dot" style="background:var(--slate);"></span>Cancelled</span>
+    <span><span class="leg-dot" style="background:var(--amber);"></span>Unmarked</span>
+    <span>· Each dot = 1 hr · Tap day for details</span>
+  </div>`;
+
+  // Day of week headers
+  html+=`<div class="cal-dow-row">`;
+  ['SUN','MON','TUE','WED','THU','FRI','SAT'].forEach((d,i)=>{
+    html+=`<div class="cal-dow${i===0||i===6?' weekend':''}">${d}</div>`;
+  });
+  html+=`</div>`;
+
+  // Day cells
+  html+=`<div class="cal-days-grid">`;
+  for(let i=0;i<sw;i++) html+=`<div class="cal-cell empty"></div>`;
+
+  for(let day=1;day<=dim;day++){
+    const ds=fmtDate(new Date(Date.UTC(calYear,calMonth,day)));
+    const d=parseDate(ds);
+    const isSelected=ds===selCalDate;
+    const isIT=ds===todayStr;
+    const isFut=d>_today;
+    const isBef=d<START_DATE;
+    const dow=new Date(Date.UTC(calYear,calMonth,day)).getUTCDay();
+    const units=getUnitsWS(ds);
+    const sts=units.map(u=>u.status);
+    const allC=sts.length>0&&sts.every(s=>s==='cancelled');
+    const hasA=sts.some(s=>s==='absent');
+    const hasU=sts.some(s=>s==='unmarked')&&!allC;
+    const allP=sts.length>0&&sts.filter(s=>s!=='cancelled').length>0&&sts.filter(s=>s!=='cancelled').every(s=>s==='present')&&!hasU;
+
+    // Cell class
+    let cls='cal-cell';
+    if(isBef) cls+=' before-start';
+    else if(isFut) cls+=' future-day';
+    else if(!units.length) cls+=' no-class';
+    else if(allC) cls+=' st-cancelled';
+    else if(hasA) cls+=' st-absent';
+    else if(hasU) cls+=' st-unmarked';
+    else if(allP) cls+=' st-present';
+    if(isIT) cls+=' is-today';
+    if(isSelected) cls+=' is-selected';
+
+    // Status label
+    let lbl='',lblC='';
+    if(!isFut&&!isBef&&units.length){
+      if(allC){lbl='Holiday';lblC='var(--slate)';}
+      else if(hasA){lbl='⚠ Absent';lblC='var(--red)';}
+      else if(hasU){lbl='Pending';lblC='var(--amber)';}
+      else if(allP){lbl='✓ Full';lblC='var(--green)';}
+    }
+
+    const dots=units.map(u=>`<div class="cdot" style="background:${dotBgFor(u.status)};" title="${u.subject}(${u.type[0]}) ${u.uStart}: ${u.status}"></div>`).join('');
+
+    html+=`<div class="${cls}" onclick="${isBef||isFut?'':''} selectCalDate('${ds}')">
+      ${isIT?`<div class="today-chip">TODAY</div>`:''}
+      <div class="cal-day-num">${day}</div>
+      <div class="cal-day-name">${DAYS_SHORT[dow]}</div>
+      <div class="cal-dots-row">${dots}</div>
+      ${lbl?`<div class="cal-status-lbl" style="color:${lblC};">${lbl}</div>`:''}
+    </div>`;
+  }
+  html+=`</div></div>`;
+
+  // Day detail panel
+  html+=buildDayPanel(selCalDate);
+  document.getElementById('content').innerHTML=html;
+}
+
+function buildDayPanel(dateStr){
+  const d=parseDate(dateStr);
+  const isFut=d>_today;
+  const isBef=d<START_DATE;
+  const isIT=dateStr===todayStr;
+  const goal=store.settings.goal;
+  const units=getUnitsWS(dateStr);
+  const groups=groupUnits(units);
+  let p=0,a=0,c=0,u=0;
+  units.forEach(x=>{
+    if(x.status==='present')p++;else if(x.status==='absent')a++;
+    else if(x.status==='cancelled')c++;else u++;
+  });
+  const dv=pct(p,a);
+
+  let html=`<div class="day-panel fade-up" id="dpanel">
+    <div class="day-panel-hdr">
+      <div>
+        <div style="font-weight:700;font-size:1.05rem;">${DAYS[d.getUTCDay()]}, ${dateStr}${isIT?' <span style="color:var(--accent);font-size:.75rem;">(Today)</span>':''}</div>
+        <div class="small" style="margin-top:2px;">${units.length} unit${units.length!==1?'s':''} · ${groups.length} slot${groups.length!==1?'s':''}</div>
+      </div>
+      <button class="edit-btn" onclick="currentDate='${dateStr}';switchTab('mark')">✏️ Edit Day</button>
+    </div>`;
+
+  if(isBef){html+=`<div class="small">📌 Semester hadn't started yet.</div></div>`;return html;}
+
+  if(isFut){
+    html+=`<div class="small" style="margin-bottom:10px;">📅 Upcoming — scheduled classes (IST):</div>`;
+    groups.forEach(g=>{
+      html+=`<div class="cls-row-panel">
+        <div class="cls-row-top">
+          <div>
+            <span style="font-weight:600;">${g.subject}</span>
+            <span class="tag ${g.type==='Practical'?'tag-p':'tag-t'}">${g.type}</span>
+            <div class="small" style="margin-top:3px;">${g.slotStart}–${g.slotEnd} · ${g.faculty} · Room ${g.room} · ${g.units.length} hr${g.units.length>1?'s':''}</div>
+          </div>
+          <span class="pct-chip na">Upcoming</span>
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;return html;
+  }
+
+  if(!units.length){html+=`<div class="small center">🎉 No classes on this day.</div></div>`;return html;}
+
+  html+=`<div class="stat-grid">
+    <div class="stat-box"><div class="num" style="color:var(--green);">${p}</div><div class="lbl">Hrs P</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--red);">${a}</div><div class="lbl">Hrs A</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--slate);">${c}</div><div class="lbl">Cancel</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--amber);">${u}</div><div class="lbl">Unmarked</div></div>
+    <div class="stat-box"><div class="num" style="color:${pctColor(dv,goal)};">${dv===null?'--':dv.toFixed(0)+'%'}</div><div class="lbl">Day %</div></div>
+  </div>`;
+
+  html+=`<div class="section-title" style="margin-top:12px;">Slot Breakdown</div>`;
+  groups.forEach(g=>{
+    const sp=g.units.filter(u=>u.status==='present').length;
+    const sa=g.units.filter(u=>u.status==='absent').length;
+    const sc=g.units.filter(u=>u.status==='cancelled').length;
+    const su2=g.units.filter(u=>!['present','absent','cancelled'].includes(u.status)).length;
+    const sv=pct(sp,sa);
+    const isLive=isIT&&isOngoing(g.slotStart,g.slotEnd);
+    html+=`<div class="cls-row-panel">
+      <div class="cls-row-top">
+        <div>
+          <span style="font-weight:600;">${g.subject}</span>
+          <span class="tag ${g.type==='Practical'?'tag-p':'tag-t'}">${g.type}</span>
+          ${isLive?`<span class="live-tag">● LIVE</span>`:''}
+          <div class="small" style="margin-top:3px;">${g.slotStart}–${g.slotEnd} IST · ${g.faculty} · ${g.units.length} hr${g.units.length>1?'s':''}</div>
+          <div class="small">${sp}P / ${sa}A / ${sc}C / ${su2} unmarked</div>
+        </div>
+        <div class="pct-chip ${chipCls(sv,goal)}">${sv===null?'--':sv.toFixed(0)+'%'}</div>
+      </div>
+      <div class="progress" style="margin:8px 0 6px;"><div style="width:${sv||0}%;background:${pctColor(sv,goal)};"></div></div>
+      <div class="hour-pills">
+        ${g.units.map(u=>{
+          const s=u.status;
+          const c2=s==='present'?'var(--green)':s==='absent'?'var(--red)':s==='cancelled'?'var(--slate)':'var(--amber)';
+          const lbl=s==='present'?'P':s==='absent'?'A':s==='cancelled'?'C':'?';
+          const live2=isIT&&isOngoing(u.uStart,u.uEnd);
+          return `<div class="hour-pill" style="border-color:${live2?'var(--accent)':c2};color:${c2};background:${c2}1a;">
+            Hr${u.hourIndex} ${u.uStart} <b>${lbl}</b>${live2?' 🔴':''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
+  // Subject bars for this day
+  const dayComp={};
+  units.forEach(u=>{
+    if(u.status==='cancelled')return;
+    const ck=u.subject+'|'+u.type;
+    dayComp[ck]=dayComp[ck]||{subject:u.subject,type:u.type,present:0,absent:0,unmarked:0};
+    if(u.status==='present')dayComp[ck].present++;
+    else if(u.status==='absent')dayComp[ck].absent++;
+    else dayComp[ck].unmarked++;
+  });
+  if(Object.keys(dayComp).length){
+    html+=`<div class="section-title" style="margin-top:14px;">Subject Analysis</div>`;
+    Object.keys(dayComp).sort().forEach(ck=>{
+      const v=dayComp[ck];const pv=pct(v.present,v.absent);
+      html+=`<div class="subj-bar" style="margin-bottom:10px;">
+        <div class="subj-bar-top">
+          <span><b>${v.subject}</b> <span class="tag ${v.type==='Practical'?'tag-p':'tag-t'}">${v.type}</span></span>
+          <span style="color:${pctColor(pv,goal)};font-weight:600;">${pctStr(v.present,v.absent)}</span>
+        </div>
+        <div class="progress"><div style="width:${pv||0}%;background:${pctColor(pv,goal)};"></div></div>
+        <div class="small" style="margin-top:3px;">${v.present}P / ${v.absent}A${v.unmarked?` / ${v.unmarked}?`:''}</div>
+      </div>`;
+    });
+  }
+
+  // Cumulative table
+  const cum=cumUpTo(dateStr);
+  if(Object.keys(cum).length){
+    html+=`<div class="section-title" style="margin-top:14px;">Cumulative as of ${dateStr}</div>
+    <table><tr><th>Subject</th><th>Type</th><th>P hrs</th><th>A hrs</th><th>%</th><th>Status</th></tr>`;
+    Object.keys(cum).sort().forEach(ck=>{
+      const v=cum[ck];const pv=pct(v.present,v.absent);const ok=pv!==null&&pv>=goal;
+      html+=`<tr><td>${v.subject}</td><td>${v.type}</td><td>${v.present}</td><td>${v.absent}</td>
+      <td style="color:${pctColor(pv,goal)};font-weight:600;">${pctStr(v.present,v.absent)}</td>
+      <td>${pv===null?'-':ok?`<span class="pill ok">Safe</span>`:`<span class="pill warn">Low</span>`}</td></tr>`;
+    });
+    html+=`</table>`;
+  }
+  html+=`</div>`;return html;
+}
+
+/* ══════════════════════════════════════
+   TIMETABLE TAB
+══════════════════════════════════════ */
+function renderTimetable(){
+  let html=`<div class="card fade-up"><b>Weekly Timetable — CSE A1</b><br><span class="small">All times IST · 1 hour = 1 attendance unit</span></div>`;
+  for(let day=1;day<=6;day++){
+    const slots=TT[day]||[];
+    html+=`<div class="card fade-up"><div style="font-weight:700;margin-bottom:8px;">${DAYS[day]}</div>`;
+    if(!slots.length){html+=`<div class="small">No classes</div></div>`;continue;}
+    html+=`<table><tr><th>Time (IST)</th><th>Subject</th><th>Type</th><th>Hrs</th><th>Faculty</th><th>Room</th><th>Note</th></tr>`;
+    slots.forEach(c=>{
+      const[sh]=c.start.split(':').map(Number);const[eh]=c.end.split(':').map(Number);
+      html+=`<tr><td>${c.start}–${c.end}</td><td>${c.subject}</td>
+      <td><span class="tag ${c.type==='Practical'?'tag-p':'tag-t'}">${c.type}</span></td>
+      <td>${eh-sh}</td><td>${c.faculty}</td><td>${c.room}</td><td>${c.note||'-'}</td></tr>`;
+    });
+    html+=`</table></div>`;
+  }
+  document.getElementById('content').innerHTML=html;
+}
+
+/* ══════════════════════════════════════
+   SETTINGS TAB
+══════════════════════════════════════ */
+function saveSettings(){
+  store.settings.goal=parseInt(document.getElementById('goalI').value)||75;
+  store.settings.semEnd=document.getElementById('semI').value;
+  store.settings.reminderTime=document.getElementById('remI').value;
+  save();alert('Settings saved ✅');
+}
+function enableRem(){
+  if(!('Notification' in window))return alert('Notifications not supported');
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){store.settings.reminderOn=true;save();alert('Reminder enabled ✅');render();}
+    else alert('Permission denied');
+  });
+}
+function disableRem(){store.settings.reminderOn=false;save();render();}
+function bulkCancel(){
+  const f=document.getElementById('bFrom').value,t=document.getElementById('bTo').value;
+  if(!f||!t)return alert('Select both dates');
+  let d=parseDate(f);const end=parseDate(t);
+  while(d<=end){getUnits(fmtDate(d)).forEach(u=>store.records[u.uid]='cancelled');d=addDays(d,1);}
+  save();alert('Marked as cancelled ✅');render();
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(store,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='att_A1_'+todayStr+'.json';a.click();
+}
+function importData(evt){
+  const file=evt.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data&&data.records){store=data;ensureShape();save();alert('Imported ✅');render();}
+      else alert('Invalid file');
+    }catch{alert('Error reading file');}
+  };
+  reader.readAsText(file);
+}
+function resetAll(){
+  if(confirm('Delete ALL data permanently?')){store={};ensureShape();save();render();}
+}
+function renderSettings(){
+  let html=`
+  <div class="card fade-up">
+    <div style="font-weight:700;margin-bottom:8px;">🕐 IST Clock</div>
+    <div style="font-size:1.2rem;font-weight:700;color:var(--accent);" id="sClock">${istFull()}</div>
+    <div class="small" style="margin-top:4px;">${DAYS[_today.getUTCDay()]}, ${todayStr}</div>
+  </div>
+  <div class="card fade-up">
+    <div style="font-weight:700;margin-bottom:8px;">🎯 Goal & Semester</div>
+    <label>Attendance Goal (%)</label><input type="number" id="goalI" value="${store.settings.goal}" min="1" max="100">
+    <label>Semester End Date</label><input type="date" id="semI" value="${store.settings.semEnd}">
+    <div class="actions"><button class="act-btn primary" onclick="saveSettings()">💾 Save Settings</button></div>
+  </div>
+  <div class="card fade-up">
+    <div style="font-weight:700;margin-bottom:8px;">🔔 Daily Reminder (IST)</div>
+    <label>Reminder Time</label><input type="time" id="remI" value="${store.settings.reminderTime}">
+    <div class="actions">${store.settings.reminderOn?`<button class="act-btn" onclick="disableRem()">🔕 Disable</button>`:`<button class="act-btn primary" onclick="enableRem()">🔔 Enable</button>`}</div>
+    <div class="small" style="margin-top:6px;">Keep this tab open for reminders to fire at IST time.</div>
+  </div>
+  <div class="card fade-up">
+    <div style="font-weight:700;margin-bottom:8px;">📅 Bulk Mark Holiday</div>
+    <label>From</label><input type="date" id="bFrom" min="${fmtDate(START_DATE)}">
+    <label>To</label><input type="date" id="bTo" min="${fmtDate(START_DATE)}">
+    <div class="actions"><button class="act-btn" onclick="bulkCancel()">Mark as Cancelled</button></div>
+  </div>
+  <div class="card fade-up">
+    <div style="font-weight:700;margin-bottom:8px;">💾 Backup & Restore</div>
+    <div class="actions">
+      <button class="act-btn primary" onclick="exportData()">⬇ Export JSON</button>
+      <label style="margin:0;"><input type="file" accept="application/json" onchange="importData(event)" style="font-size:.74rem;"></label>
+    </div>
+    <div class="small" style="margin-top:6px;">Export weekly — data lives only in this browser.</div>
+  </div>
+  <div class="card fade-up">
+    <div style="font-weight:700;margin-bottom:8px;">⚠ Danger Zone</div>
+    <div class="actions"><button class="act-btn danger" onclick="resetAll()">🗑 Reset All Data</button></div>
+  </div>
+  <div class="card fade-up small">Batch: <b>CSE A1</b> · Start: <b>28 Jul 2026 IST</b> · v6</div>`;
+  document.getElementById('content').innerHTML=html;
+  setInterval(()=>{const el=document.getElementById('sClock');if(el)el.textContent=istFull();},1000);
+}
+
+/* ══════════════════════════════════════
+   REMINDER LOOP
+══════════════════════════════════════ */
+setInterval(()=>{
+  if(!store.settings.reminderOn)return;
+  const hhmm=istHHMM();const ds=fmtDate(nowIST());
+  if(hhmm===store.settings.reminderTime&&store.settings.lastNotified!==ds){
+    const unmarked=getUnits(ds).filter(u=>!store.records[u.uid]);
+    if(unmarked.length>0&&Notification.permission==='granted'){
+      new Notification('📋 Attendance Reminder',{body:`${unmarked.length} unmarked hour${unmarked.length>1?'s':''} today!`});
+    }
+    store.settings.lastNotified=ds;save();
+  }
+},30000);
+
+render();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('Service worker registered ✅'))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
