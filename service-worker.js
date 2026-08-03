@@ -2,7 +2,7 @@ const CACHE_NAME = 'attendance-cache-v1';
 const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
+  './launchericon-512x512.png',
   './icons/icon-512.png'
 ];
 
